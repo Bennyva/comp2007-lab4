@@ -27,20 +27,26 @@ namespace lesson10
 
             var user = new IdentityUser() { UserName = txtUsername.Text };
             IdentityResult result = manager.Create(user, txtPassword.Text);
-
-            if (result.Succeeded)
+            try
             {
-                //StatusMessage.Text = string.Format("User {0} was created successfully!", user.UserName);
-                var authenticationManager = HttpContext.Current.GetOwinContext().Authentication;
-                var userIdentity = manager.CreateIdentity(user, DefaultAuthenticationTypes.ApplicationCookie);
-                authenticationManager.SignIn(new AuthenticationProperties() { }, userIdentity);
-                Response.Redirect("admin/main-menu.aspx");
+                if (result.Succeeded)
+                {
+                    //StatusMessage.Text = string.Format("User {0} was created successfully!", user.UserName);
+                    var authenticationManager = HttpContext.Current.GetOwinContext().Authentication;
+                    var userIdentity = manager.CreateIdentity(user, DefaultAuthenticationTypes.ApplicationCookie);
+                    authenticationManager.SignIn(new AuthenticationProperties() { }, userIdentity);
+                    Response.Redirect("admin/main-menu.aspx");
 
+                }
+                else
+                {
+                    lblStatus.Text = result.Errors.FirstOrDefault();
+                    lblStatus.CssClass = "label label-danger";
+                }
             }
-            else
+            catch (Exception)
             {
-                lblStatus.Text = result.Errors.FirstOrDefault();
-                lblStatus.CssClass = "label label-danger";
+                Server.Transfer("/error.aspx");
             }
         }
     }

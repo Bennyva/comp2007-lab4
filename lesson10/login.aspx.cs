@@ -37,19 +37,25 @@ namespace lesson10
             var userStore = new UserStore<IdentityUser>();
             var userManager = new UserManager<IdentityUser>(userStore);
             var user = userManager.Find(UserName.Text, Password.Text);
-
-            if (user != null)
+            try
             {
-                var authenticationManager = HttpContext.Current.GetOwinContext().Authentication;
-                var userIdentity = userManager.CreateIdentity(user, DefaultAuthenticationTypes.ApplicationCookie);
+                if (user != null)
+                {
+                    var authenticationManager = HttpContext.Current.GetOwinContext().Authentication;
+                    var userIdentity = userManager.CreateIdentity(user, DefaultAuthenticationTypes.ApplicationCookie);
 
-                authenticationManager.SignIn(new AuthenticationProperties() { IsPersistent = false }, userIdentity);
-                Response.Redirect("admin/main-menu.aspx");
+                    authenticationManager.SignIn(new AuthenticationProperties() { IsPersistent = false }, userIdentity);
+                    Response.Redirect("admin/main-menu.aspx");
+                }
+                else
+                {
+                    StatusText.Text = "Invalid username or password.";
+                    LoginStatus.Visible = true;
+                }
             }
-            else
+            catch (Exception)
             {
-                StatusText.Text = "Invalid username or password.";
-                LoginStatus.Visible = true;
+                Server.Transfer("/error.aspx");
             }
         }
     }
